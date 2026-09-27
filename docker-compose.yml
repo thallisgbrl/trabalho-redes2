@@ -1,0 +1,132 @@
+services:
+  pc_a:
+    image: alpine
+    container_name: pc_a
+    command: tail -f /dev/null
+    cap_add:
+      - NET_ADMIN
+    networks:
+      net_pc_a:
+        ipv4_address: 10.0.1.100
+
+  r1:
+    image: frrouting/frr:latest
+    container_name: r1
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    volumes:
+      - ./frr/r1:/etc/frr
+    networks:
+      net_pc_a:
+        ipv4_address: 10.0.1.1
+      net_r1_r2:
+        ipv4_address: 10.0.12.1
+      net_r1_r3:
+        ipv4_address: 10.0.13.1
+
+  r2:
+    image: frrouting/frr:latest
+    container_name: r2
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    volumes:
+      - ./frr/r2:/etc/frr
+    networks:
+      net_r1_r2:
+        ipv4_address: 10.0.12.2
+      net_r2_r4:
+        ipv4_address: 10.0.24.2
+
+  r3:
+    image: frrouting/frr:latest
+    container_name: r3
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    volumes:
+      - ./frr/r3:/etc/frr
+    networks:
+      net_r1_r3:
+        ipv4_address: 10.0.13.3
+      net_r3_r4:
+        ipv4_address: 10.0.34.3
+
+  r4:
+    image: frrouting/frr:latest
+    container_name: r4
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    volumes:
+      - ./frr/r4:/etc/frr
+    networks:
+      net_r2_r4:
+        ipv4_address: 10.0.24.4
+      net_r3_r4:
+        ipv4_address: 10.0.34.4
+      net_r4_r5:
+        ipv4_address: 10.0.45.4
+
+  r5:
+    image: frrouting/frr:latest
+    container_name: r5
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    volumes:
+      - ./frr/r5:/etc/frr
+    networks:
+      net_r4_r5:
+        ipv4_address: 10.0.45.5
+      net_pc_b:
+        ipv4_address: 10.0.5.5
+
+  pc_b:
+    image: alpine
+    container_name: pc_b
+    command: tail -f /dev/null
+    cap_add:
+      - NET_ADMIN
+    networks:
+      net_pc_b:
+        ipv4_address: 10.0.5.100
+
+networks:
+  net_pc_a:
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
+          gateway: 10.0.1.254
+  net_r1_r2:
+    ipam:
+      config:
+        - subnet: 10.0.12.0/24
+          gateway: 10.0.12.254
+  net_r1_r3:
+    ipam:
+      config:
+        - subnet: 10.0.13.0/24
+          gateway: 10.0.13.254
+  net_r2_r4:
+    ipam:
+      config:
+        - subnet: 10.0.24.0/24
+          gateway: 10.0.24.254
+  net_r3_r4:
+    ipam:
+      config:
+        - subnet: 10.0.34.0/24
+          gateway: 10.0.34.254
+  net_r4_r5:
+    ipam:
+      config:
+        - subnet: 10.0.45.0/24
+          gateway: 10.0.45.254
+  net_pc_b:
+    ipam:
+      config:
+        - subnet: 10.0.5.0/24
+          gateway: 10.0.5.254
+
